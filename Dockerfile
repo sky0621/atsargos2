@@ -3,7 +3,7 @@ WORKDIR /app
 COPY backend/* ./
 RUN go mod download && go build -o main /app/main.go
 
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/base-debian12
 WORKDIR /app
 COPY --from=builder /app/main .
 USER 1001
