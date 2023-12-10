@@ -26,9 +26,3 @@ variable "ingress_pattern" {
   type        = string
   default     = "INGRESS_TRAFFIC_ALL"
 }
-
-variable "cloud_run_account_id" {
-  description = "account ID of Cloud Run Service Account"
-  type        = string
-  default     = "cloud-run"
-}

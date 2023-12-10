@@ -1,9 +1,8 @@
 resource "google_cloud_run_v2_service" "default" {
   project  = var.project_id
   location = var.region
-
-  name    = "app"
-  ingress = var.ingress_pattern
+  name     = "app"
+  ingress  = var.ingress_pattern
 
   template {
     service_account = var.service_account

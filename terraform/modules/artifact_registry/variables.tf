@@ -8,17 +8,12 @@ variable "region" {
   default = null
 }
 
-variable "service_account" {
+variable "repository_id" {
   type    = string
   default = null
 }
 
-variable "container_image" {
+variable "format" {
   type    = string
-  default = null
-}
-
-variable "ingress_pattern" {
-  type    = string
-  default = null
+  default = "DOCKER"
 }

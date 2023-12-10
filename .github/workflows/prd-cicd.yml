@@ -1,0 +1,10 @@
+name: "[Prd] build and deploy"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dev-deploy:
+    uses: ./.github/workflows/cicd.yml
+    with:
+      env: prd
