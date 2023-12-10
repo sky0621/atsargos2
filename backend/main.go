@@ -33,7 +33,7 @@ func main() {
 		e.Use(middleware.Recover())
 		e.Use(middleware.CORS())
 
-		e.GET("/*", test())
+		e.GET("/*", test(user.Email))
 	}
 
 	port := os.Getenv("PORT")
@@ -46,8 +46,8 @@ func main() {
 	}
 }
 
-func test() echo.HandlerFunc {
+func test(mail string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "test")
+		return c.JSON(http.StatusOK, mail)
 	}
 }
