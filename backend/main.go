@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
-	firebase "firebase.google.com/go"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"firebase.google.com/go/auth"
+
+	firebase "firebase.google.com/go"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -20,20 +24,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	user, err := authCli.GetUser(ctx, "BYk3T97IzjgZz3xCrKK2ax4M11F3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(user.Email)
+	fmt.Println(authCli)
 
 	var e *echo.Echo
 	{
 		e = echo.New()
+		e.Pre(createCustomMiddleware(authCli))
 		e.Use(middleware.Logger())
 		e.Use(middleware.Recover())
 		e.Use(middleware.CORS())
+		e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(5)))
 
-		e.GET("/*", test(user.Email))
+		e.GET("/*", test())
 	}
 
 	port := os.Getenv("PORT")
@@ -46,8 +48,26 @@ func main() {
 	}
 }
 
-func test(mail string) echo.HandlerFunc {
+func test() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, mail)
+		return c.JSON(http.StatusOK, "test")
+	}
+}
+
+func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			idToken := c.Request().Header.Get("idToken")
+			token, err := authCli.VerifyIDToken(c.Request().Context(), idToken)
+			if err != nil {
+				return err
+			}
+			if token == nil {
+				return fmt.Errorf("token is nil")
+			}
+			fmt.Println(token)
+			err = next(c)
+			return err
+		}
 	}
 }
