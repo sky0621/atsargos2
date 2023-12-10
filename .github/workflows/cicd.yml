@@ -25,7 +25,7 @@ jobs:
         name: "Checkout"
         uses: "actions/checkout@v3"
 
-      - id: "set-variables"
+      - id: "set-vars"
         name: "Set variables"
         run: |
           prj_id=-${{ vars.GCP_PROJECT_ID }}
@@ -35,7 +35,7 @@ jobs:
           workload_identity_id_suffix=${{ vars.GCP_WORKLOAD_IDENTITY_ID_SUFFIX }}
           pool=workloadIdentityPools/gha-pool-${workload_identity_id_suffix}
           provider=providers/gha-prov-${workload_identity_id_suffix}
-          echo "WORKLOAD_IDENTITY_PROVIDER=projects/${{ inputs.gcp-project-no }}/locations/global/${pool}/${provider}" >> $GITHUB_OUTPUT
+          echo "WORKLOAD_IDENTITY_PROVIDER=projects/${{ vars.GCP_PROJECT_NO }}/locations/global/${pool}/${provider}" >> $GITHUB_OUTPUT
 
           repo_domain=${{ env.region }}-docker.pkg.dev
           echo "REPO_DOMAIN=${repo_domain}" >> $GITHUB_OUTPUT
@@ -45,29 +45,29 @@ jobs:
         name: "Google auth"
         uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: "${{ steps.set-variables.outputs.WORKLOAD_IDENTITY_PROVIDER }}"
-          service_account: "${{ steps.set-variables.outputs.SERVICE_ACCOUNT }}"
+          workload_identity_provider: "${{ steps.set-vars.outputs.WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ steps.set-vars.outputs.SERVICE_ACCOUNT }}"
 
       - id: "gcloud-setup"
         name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
         with:
-          project_id: "${{ steps.set-variables.outputs.PROJECT_ID }}"
+          project_id: "${{ steps.set-vars.outputs.PROJECT_ID }}"
 
       - id: "docker-auth"
         name: "Docker auth"
         run: |-
-          gcloud auth configure-docker ${{ steps.set-variables.outputs.REPO_DOMAIN }}
+          gcloud auth configure-docker ${{ steps.set-vars.outputs.REPO_DOMAIN }}
 
       - id: "build"
         name: "Build container"
         run: |-
-          docker build -t "${{ steps.set-variables.outputs.IMAGE }}" .
+          docker build -t "${{ steps.set-vars.outputs.IMAGE }}" .
 
       - id: "push"
         name: "Push container"
         run: |-
-          docker push "${{ steps.set-variables.outputs.IMAGE }}"
+          docker push "${{ steps.set-vars.outputs.IMAGE }}"
 
       - id: "deploy"
         name: "Deploy to Cloud Run"
@@ -75,7 +75,7 @@ jobs:
         with:
           service: ${{ env.service }}
           region: ${{ env.region }}
-          image: ${{ steps.set-variables.outputs.IMAGE }}
+          image: ${{ steps.set-vars.outputs.IMAGE }}
           flags: "--allow-unauthenticated"
           # NOTE: You can also set env variables here:
           #  env_vars: |
