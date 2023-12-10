@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	firebase "firebase.google.com/go"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -9,7 +11,20 @@ import (
 )
 
 func main() {
-	//	ctx := context.Background()
+	ctx := context.Background()
+	app, err := firebase.NewApp(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	authCli, err := app.Auth(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	user, err := authCli.GetUser(ctx, "BYk3T97IzjgZz3xCrKK2ax4M11F3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(user.Email)
 
 	var e *echo.Echo
 	{
