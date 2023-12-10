@@ -28,7 +28,7 @@ jobs:
       - id: "set-vars"
         name: "Set variables"
         run: |
-          prj_id=-${{ vars.GCP_PROJECT_ID }}
+          prj_id=${{ vars.GCP_PROJECT_ID }}
           echo "PROJECT_ID=${prj_id}" >> $GITHUB_OUTPUT
           echo "SERVICE_ACCOUNT=github-actions-sa@${prj_id}.iam.gserviceaccount.com" >> $GITHUB_OUTPUT
 
