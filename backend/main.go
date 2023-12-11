@@ -31,6 +31,7 @@ func main() {
 	if projectID == "" {
 		log.Fatal("no PROJECT_ID")
 	}
+	fmt.Println(projectID)
 
 	ctx := context.Background()
 	app, err := firebase.NewApp(ctx, nil)
@@ -99,7 +100,10 @@ func static() echo.HandlerFunc {
 			log.Println(err)
 			return err
 		}
-		fs := http.FileServer(http.Dir(filepath.Join(wd, "view")))
+		fmt.Println(wd)
+		root := http.Dir(filepath.Join(wd, "view"))
+		fmt.Println(root)
+		fs := http.FileServer(root)
 		fs.ServeHTTP(c.Response(), c.Request())
 		return nil
 	}
