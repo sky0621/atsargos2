@@ -3,15 +3,16 @@ module github.com/sky0621/atsargos2
 go 1.21.1
 
 require (
+	cloud.google.com/go/firestore v1.14.0
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/labstack/echo/v4 v4.11.3
+	golang.org/x/image v0.14.0
 )
 
 require (
 	cloud.google.com/go v0.110.10 // indirect
 	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/firestore v1.14.0 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/longrunning v0.5.4 // indirect
 	cloud.google.com/go/storage v1.35.1 // indirect
