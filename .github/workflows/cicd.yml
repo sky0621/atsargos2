@@ -85,7 +85,7 @@ jobs:
       - id: "update-traffic"
         name: "Update traffic to latest"
         run: |-
-          gcloud run services update-traffic ${{ env.service }} --region=${{ env.region }} --to-latest
+          gcloud run services update-traffic ${{ env.service }} --region=${{ env.region }} --to-latest --set-env-vars "PROJECT_ID=${{ steps.set-vars.outputs.PROJECT_ID }}"
 
       # If required, use the Cloud Run url output in later steps
       - id: "show-output"
