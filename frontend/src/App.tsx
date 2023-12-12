@@ -1,29 +1,23 @@
-import { Button, Layout } from "antd";
-import { useState } from "react";
+import { Button, Flex, Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
+import styles from "./styles.module.css";
+import { useApp } from "./useApp.ts";
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
-
-  const login = () => {
-    setLoggedIn(true);
-  };
+  const { loggedIn, login } = useApp();
 
   return (
-    <Layout>
-      <Header
-        style={{
-          fontSize: "24px",
-          color: "white",
-          textAlign: "center",
-          backgroundColor: "darkgoldenrod",
-        }}
-      >
-        atsargos2
-      </Header>
-      <Content style={{ height: "100%", padding: "16px" }}>
+    <Layout className={styles.layout}>
+      <Header className={styles.header}>atsargos2</Header>
+      <Content className={styles.content}>
         {loggedIn && <>HOME</>}
-        {!loggedIn && <Button onClick={login}>LOGIN</Button>}
+        {!loggedIn && (
+          <Flex justify="center">
+            <Button className={styles.loginButton} onClick={login}>
+              LOGIN
+            </Button>
+          </Flex>
+        )}
       </Content>
     </Layout>
   );
