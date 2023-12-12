@@ -1,0 +1,17 @@
+{
+    "configurations": [
+
+        {
+            "name": "go build github.com/sky0621/atsargos2",
+            "type": "go",
+            "workingDir": "$PROJECT_DIR$",
+            "goExecPath": "/usr/local/go/bin/go",
+            "buildParams": [
+                "github.com/sky0621/atsargos2"
+            ],
+            "environment": {
+                "PROJECT_ID": "atsargos2-ec9acdf2"
+            },
+        },
+    ]
+}

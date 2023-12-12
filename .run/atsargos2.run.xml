@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="atsargos2" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="atsargos2" />
+    <working_directory value="$PROJECT_DIR$/backend" />
+    <envs>
+      <env name="PROJECT_ID" value="atsargos2-ec9acdf2" />
+    </envs>
+    <kind value="PACKAGE" />
+    <package value="github.com/sky0621/atsargos2" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/backend/main.go" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,9 +1,9 @@
 import { Button, Row } from "antd";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth, provider } from "../../lib/firebase.ts";
 import { useRecoilState } from "recoil";
-import { idTokenState } from "../../state/idToken/idTokenAtom.ts";
 import { useNavigate } from "react-router-dom";
+import { idTokenState } from "../../../state/idToken/idTokenAtom.ts";
+import { auth, provider } from "../../../lib/firebase.ts";
 
 const LoginPage = () => {
   const navigate = useNavigate();

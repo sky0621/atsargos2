@@ -34,7 +34,7 @@ func main() {
 	fmt.Println(projectID)
 
 	ctx := context.Background()
-	app, err := firebase.NewApp(ctx, nil)
+	app, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: projectID})
 	if err != nil {
 		log.Fatal(err)
 	}

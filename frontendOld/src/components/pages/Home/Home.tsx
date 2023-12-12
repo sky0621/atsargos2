@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
-import { idTokenState } from "../../state/idToken/idTokenAtom.ts";
 import { useNavigate } from "react-router-dom";
+import { idTokenState } from "../../../state/idToken/idTokenAtom.ts";
 
 const HomePage = () => {
   const navigate = useNavigate();
