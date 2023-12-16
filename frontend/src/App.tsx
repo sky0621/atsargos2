@@ -4,13 +4,18 @@ import styles from "./styles.module.css";
 import { useApp } from "./useApp.ts";
 
 function App() {
-  const { loggedIn, login } = useApp();
+  const { loggedIn, login, items } = useApp();
 
   return (
     <Layout className={styles.layout}>
       <Header className={styles.header}>atsargos2</Header>
       <Content className={styles.content}>
-        {loggedIn && <>HOME</>}
+        {loggedIn && (
+          <>
+            <div>Home</div>
+            {items?.map((item, idx) => <div key={idx}>{item.name}</div>)}
+          </>
+        )}
         {!loggedIn && (
           <Flex justify="center">
             <Button className={styles.loginButton} onClick={login}>

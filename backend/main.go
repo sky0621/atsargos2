@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"image/gif"
@@ -62,7 +63,7 @@ func main() {
 
 		e.GET("/*", static())
 		g := e.Group("/api", createCustomMiddleware(authCli))
-		g.GET("/list", list(firestoreCli, projectID))
+		g.GET("/item", listItem(firestoreCli, projectID))
 	}
 
 	port := os.Getenv("PORT")
@@ -78,7 +79,7 @@ func main() {
 func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			idToken := c.Request().Header.Get("idToken")
+			idToken := c.Request().Header.Get("id-token")
 			token, err := authCli.VerifyIDToken(c.Request().Context(), idToken)
 			if err != nil {
 				return err
@@ -109,21 +110,21 @@ func static() echo.HandlerFunc {
 	}
 }
 
-func list(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
+func listItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-		iter := firestoreCli.Collection("image").Documents(ctx)
-		var images []*Image
+		iter := firestoreCli.Collection("items").Documents(ctx)
+		var items []*Item
 		for {
 			doc, err := iter.Next()
-			if err == iterator.Done {
+			if errors.Is(err, iterator.Done) {
 				break
 			}
 			if err != nil {
 				return err
 			}
-			var image *Image
-			if err := doc.DataTo(&image); err != nil {
+			var item *Item
+			if err := doc.DataTo(&item); err != nil {
 				fmt.Println(err)
 				return c.String(http.StatusInternalServerError, err.Error())
 			}
@@ -131,14 +132,14 @@ func list(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
 				fmt.Println(err)
 				return c.String(http.StatusInternalServerError, err.Error())
 			}
-			image.URL = "https://firebasestorage.googleapis.com/v0/b/" + projectID + ".appspot.com/o/" + image.Name + "?alt=media"
-			images = append(images, image)
+			item.URL = "https://firebasestorage.googleapis.com/v0/b/" + projectID + ".appspot.com/o/" + item.Name + "?alt=media"
+			items = append(items, item)
 		}
-		return c.JSON(http.StatusOK, images)
+		return c.JSON(http.StatusOK, items)
 	}
 }
 
-type Image struct {
+type Item struct {
 	ID     string `json:"id"`
 	Date   string `json:"date"`
 	Name   string `json:"name"`
