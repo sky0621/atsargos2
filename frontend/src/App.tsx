@@ -1,24 +1,20 @@
-import { Button, Flex, Layout } from "antd";
+import { Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import styles from "./styles.module.css";
-import { useApp } from "./useApp.ts";
 import DashboardPage from "./pages/Dashboard/Dashboard.tsx";
+import LoginPage from "./pages/Login/Login.tsx";
+import { useState } from "react";
 
 function App() {
-  const { loggedIn, login, items } = useApp();
+  // FIXME: local 動作確認用に true にしておく
+  const [loggedIn, setLoggedIn] = useState<boolean>(true);
 
   return (
     <Layout className={styles.layout}>
       <Header className={styles.header}>atsargos2</Header>
       <Content className={styles.content}>
-        {loggedIn && <DashboardPage items={items} />}
-        {!loggedIn && (
-          <Flex justify="center">
-            <Button className={styles.loginButton} onClick={login}>
-              LOGIN
-            </Button>
-          </Flex>
-        )}
+        {loggedIn && <DashboardPage />}
+        {!loggedIn && <LoginPage setLoggedIn={setLoggedIn} />}
       </Content>
     </Layout>
   );

@@ -1,12 +1,13 @@
-import { get } from "./api.ts";
+import { get } from "./lib/api.ts";
 import { z } from "zod";
-import { toError } from "./error.ts";
+import { toError } from "./lib/error.ts";
 
 export const ItemSchema = z.object({
   id: z.string(),
   date: z.string(),
   name: z.string(),
   notify: z.number(),
+  url: z.string(),
 });
 
 export type Item = z.infer<typeof ItemSchema>;

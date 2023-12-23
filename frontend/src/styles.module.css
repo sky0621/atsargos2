@@ -1,5 +1,6 @@
 .layout {
     height: 100vh;
+    background-color: whitesmoke;
 }
 
 .header {
@@ -11,9 +12,4 @@
 
 .content {
     padding: 32px;
-}
-
-.loginButton {
-    width: 160px;
-    height: 42px;
 }
