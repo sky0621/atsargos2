@@ -1,6 +1,6 @@
-import { get } from "./lib/api.ts";
 import { z } from "zod";
-import { toError } from "./lib/error.ts";
+import { get } from "../lib/api.ts";
+import { toError } from "../lib/error.ts";
 
 export const ItemSchema = z.object({
   id: z.string(),
@@ -19,7 +19,7 @@ export type Items = z.infer<typeof ItemsSchema>;
 export const listItem = async (): Promise<Items> => {
   let response: Response;
   try {
-    response = await get("/item");
+    response = await get("/items");
     console.info(response);
     if (response.ok) {
       return ItemsSchema.parse(response.body);

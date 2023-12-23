@@ -14,6 +14,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+
+	"github.com/google/uuid"
 
 	"google.golang.org/api/iterator"
 
@@ -63,7 +67,8 @@ func main() {
 
 		e.GET("/*", static())
 		g := e.Group("/api", createCustomMiddleware(authCli))
-		g.GET("/item", listItem(firestoreCli, projectID))
+		g.GET("/items", addItem(firestoreCli, projectID))
+		g.POST("/items", listItem(firestoreCli, projectID))
 	}
 
 	port := os.Getenv("PORT")
@@ -107,6 +112,59 @@ func static() echo.HandlerFunc {
 		fs := http.FileServer(root)
 		fs.ServeHTTP(c.Response(), c.Request())
 		return nil
+	}
+}
+
+func addItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		date := c.FormValue("date")
+		name := c.FormValue("name")
+		notifyStr := c.FormValue("notify")
+		notify, err := strconv.Atoi(notifyStr)
+		if err != nil {
+			fmt.Println(err)
+			if !strings.Contains(err.Error(), "no such file") {
+				return c.String(http.StatusInternalServerError, err.Error())
+			}
+		}
+
+		//imageFile, err := c.FormFile("imageFile")
+		//if err != nil {
+		//	fmt.Println(err)
+		//	if !strings.Contains(err.Error(), "no such file") {
+		//		return c.String(http.StatusInternalServerError, err.Error())
+		//	}
+		//}
+
+		id := uuid.New().String()
+
+		//if imageFile != nil {
+		//	f, err := imageFile.Open()
+		//	if err != nil {
+		//		fmt.Println(err)
+		//		return c.String(http.StatusInternalServerError, err.Error())
+		//	}
+		//
+		//	if err := uploadGCSObjectFunc(c.Request().Context(), id, f); err != nil {
+		//		fmt.Println(err)
+		//		return c.String(http.StatusInternalServerError, err.Error())
+		//	}
+		//}
+
+		_, err = firestoreCli.Collection("items").Doc(id).Set(c.Request().Context(),
+			map[string]interface{}{
+				"id":     id,
+				"date":   date,
+				"name":   name,
+				"notify": notify,
+			},
+		)
+		if err != nil {
+			fmt.Println(err)
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		return c.JSON(http.StatusCreated, nil)
 	}
 }
 
