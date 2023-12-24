@@ -8,9 +8,10 @@ const ItemList = () => {
 
   return (
     <Flex data-id="FLEX" wrap="wrap" gap="middle">
-      {items?.map((item) => (
+      {items?.map((item, idx) => (
         <Card
           data-id="CARD"
+          key={idx}
           hoverable
           className={styles.card}
           cover={<img alt={item.name} src={item.url} className={styles.img} />}

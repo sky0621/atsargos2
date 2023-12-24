@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { get } from "../lib/api.ts";
+import { get, post } from "../lib/api.ts";
 import { toError } from "../lib/error.ts";
+import { AddItemType } from "../pages/Dashboard/components/AddItem/addItem.ts";
 
 export const ItemSchema = z.object({
   id: z.string(),
@@ -16,10 +17,10 @@ export const ItemsSchema = z.array(ItemSchema);
 
 export type Items = z.infer<typeof ItemsSchema>;
 
-export const listItem = async (): Promise<Items> => {
+export const listItem = async (idToken: string): Promise<Items> => {
   let response: Response;
   try {
-    response = await get("/items");
+    response = await get("/items", idToken);
     console.info(response);
     if (response.ok) {
       return ItemsSchema.parse(response.body);
@@ -29,4 +30,13 @@ export const listItem = async (): Promise<Items> => {
     throw e;
   }
   throw toError(response);
+};
+
+export const addItem = async (idToken: string, item: AddItemType) => {
+  try {
+    await post("/items", idToken, JSON.stringify(item));
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 };

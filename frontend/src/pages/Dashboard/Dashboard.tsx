@@ -1,7 +1,7 @@
 import ItemList from "./components/ItemList/ItemList.tsx";
-import AddItemButton from "./components/AddItemButton/AddItemButton.tsx";
 import { useDashboard } from "./useDashboard.ts";
-import AddItemModal from "./components/AddItemModal/AddItemModal.tsx";
+import AddItemModal from "./components/AddItem/AddItemModal/AddItemModal.tsx";
+import AddItemButton from "./components/AddItem/AddItemButton/AddItemButton.tsx";
 
 const DashboardPage = () => {
   console.info("DashboardPage");

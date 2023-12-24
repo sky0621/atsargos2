@@ -7,7 +7,7 @@ import { useState } from "react";
 
 function App() {
   // FIXME: local 動作確認用に true にしておく
-  const [loggedIn, setLoggedIn] = useState<boolean>(true);
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   return (
     <Layout className={styles.layout}>

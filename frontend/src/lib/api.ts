@@ -1,22 +1,29 @@
-import { useCookies } from "react-cookie";
-import { ID_TOKEN_COOKIE_KEY } from "./constants.ts";
 import { UnauthorizedError } from "./error.ts";
 
-export async function get(path: string): Promise<Response> {
-  return callApi("get", path);
+export async function get(path: string, idToken: string): Promise<Response> {
+  console.info("[lib/api][get] call", path);
+  return callApi("get", path, idToken);
 }
 
-export async function post(path: string, body?: string): Promise<Response> {
-  return callApi("post", path, body);
+export async function post(
+  path: string,
+  idToken: string,
+  body?: string,
+): Promise<Response> {
+  console.info("[lib/api][post] call", path, body);
+  return callApi("post", path, idToken, body);
 }
 
 export async function callApi(
   method: string,
   path: string,
+  idToken: string,
   body?: string,
 ): Promise<Response> {
-  const [idToken] = useCookies([ID_TOKEN_COOKIE_KEY]);
+  console.info("[lib/api][callApi] call", method, path, idToken, body);
+
   if (!idToken) {
+    console.error("[lib/api][callApi] no idToken");
     throw UnauthorizedError;
   }
   const init: RequestInit = {
@@ -32,6 +39,7 @@ export async function callApi(
   }
 
   const response = await fetch("/api" + path, init);
+  console.info("[lib/api][callApi] got response:", response);
   if (response.ok) {
     return response;
   }
