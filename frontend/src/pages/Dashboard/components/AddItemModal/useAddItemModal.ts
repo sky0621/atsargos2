@@ -1,13 +1,15 @@
 import { Dispatch, SetStateAction } from "react";
 
-export const useAddItemButton = (
+export const useAddItemModal = (
   setShowAddModal: Dispatch<SetStateAction<boolean>>,
 ) => {
   const addItem = () => {
-    setShowAddModal(true);
+    alert("addItem");
   };
 
-  return {
-    addItem,
+  const closeModal = () => {
+    setShowAddModal(false);
   };
+
+  return { addItem, closeModal };
 };

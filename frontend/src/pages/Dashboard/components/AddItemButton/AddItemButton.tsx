@@ -2,14 +2,20 @@ import { Avatar } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import styles from "./styles.module.css";
 import { useAddItemButton } from "./useAddItemButton.ts";
+import { Dispatch, SetStateAction } from "react";
 
-const AddItemButton = () => {
+type Props = {
+  setShowAddModal: Dispatch<SetStateAction<boolean>>;
+};
+
+const AddItemButton = (props: Props) => {
   console.info("AddItemButton");
-  const {} = useAddItemButton();
+  const { addItem } = useAddItemButton(props.setShowAddModal);
+
   return (
     <Avatar
       icon={<PlusCircleOutlined />}
-      onClick={}
+      onClick={addItem}
       className={styles.avatar}
     />
   );
