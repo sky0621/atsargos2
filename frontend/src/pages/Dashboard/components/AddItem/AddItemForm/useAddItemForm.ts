@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getIdTokenFromCookie } from "../../../../../lib/cookie.ts";
 
 export const useAddItemForm = () => {
+  console.info("[useAddItemForm] start");
   const [error, setError] = useState("");
   const idToken = getIdTokenFromCookie();
 
