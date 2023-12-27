@@ -11,7 +11,7 @@ export const useAddItemForm = () => {
     const item = AddItemSchema.parse(values);
     console.info("[useAddItemForm][onFinish] item:", item);
     try {
-      await addItem("", item);
+      await addItem(idToken, item);
     } catch (e) {
       console.error(e);
       if (e instanceof Error) {
