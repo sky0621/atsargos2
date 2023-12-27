@@ -39,7 +39,7 @@ func main() {
 	fmt.Println(projectID)
 
 	ctx := context.Background()
-	app, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: projectID})
+	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,8 +67,8 @@ func main() {
 
 		e.GET("/*", static())
 		g := e.Group("/api", createCustomMiddleware(authCli))
-		g.GET("/items", addItem(firestoreCli, projectID))
-		g.POST("/items", listItem(firestoreCli, projectID))
+		g.GET("/items", listItem(firestoreCli, projectID))
+		g.POST("/items", addItem(firestoreCli, projectID))
 	}
 
 	port := os.Getenv("PORT")

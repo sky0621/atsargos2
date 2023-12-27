@@ -20,7 +20,7 @@ export async function callApi(
   idToken: string,
   body?: string,
 ): Promise<Response> {
-  console.info("[lib/api][callApi] call", method, path, idToken, body);
+  console.info("[lib/api][callApi] call", method, path, body);
 
   if (!idToken) {
     console.error("[lib/api][callApi] no idToken");
@@ -38,7 +38,9 @@ export async function callApi(
     init.body = body;
   }
 
-  const response = await fetch("/api" + path, init);
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+
+  const response = await fetch(baseUrl + "/api" + path, init);
   console.info("[lib/api][callApi] got response:", response);
   if (response.ok) {
     return response;

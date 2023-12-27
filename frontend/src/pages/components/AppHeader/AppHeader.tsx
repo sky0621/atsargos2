@@ -3,6 +3,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { useAuthContext } from "../AuthProvider.tsx";
 import { signOutByGoogle } from "../../../lib/firebase.ts";
 import styles from "./styles.module.css";
+import React from "react";
 
 const AppHeader = () => {
   console.info("AppHeader");

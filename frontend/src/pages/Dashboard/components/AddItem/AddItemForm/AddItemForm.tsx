@@ -15,6 +15,20 @@ const AddItemForm = () => {
         >
           <Input />
         </Form.Item>
+        <Form.Item
+          label="Date"
+          name="date"
+          rules={[{ required: true, message: "Please input date!" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Notify"
+          name="notify"
+          rules={[{ required: true, message: "Please input notify!" }]}
+        >
+          <Input />
+        </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Submit

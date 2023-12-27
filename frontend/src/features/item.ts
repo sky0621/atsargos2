@@ -18,12 +18,15 @@ export const ItemsSchema = z.array(ItemSchema);
 export type Items = z.infer<typeof ItemsSchema>;
 
 export const listItem = async (idToken: string): Promise<Items> => {
+  console.info("[listItem] start");
   let response: Response;
   try {
     response = await get("/items", idToken);
-    console.info(response);
+    console.info("[listItem] got response", response);
     if (response.ok) {
-      return ItemsSchema.parse(response.body);
+      const jsonBody = await response.json();
+      console.info("[listItem] got json", jsonBody);
+      return ItemsSchema.parse(jsonBody);
     }
   } catch (e) {
     console.error(e);
@@ -33,6 +36,7 @@ export const listItem = async (idToken: string): Promise<Items> => {
 };
 
 export const addItem = async (idToken: string, item: AddItemType) => {
+  console.info("[addItem] start");
   try {
     await post("/items", idToken, JSON.stringify(item));
   } catch (e) {
