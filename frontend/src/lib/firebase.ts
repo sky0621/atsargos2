@@ -1,5 +1,11 @@
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { FirebaseError } from "@firebase/util";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -25,13 +31,37 @@ export type GoogleCredential = {
 };
 
 export const signInByGoogle = async (): Promise<GoogleCredential> => {
-  const result = await signInWithPopup(firebaseAuth, provider);
-  const credential = GoogleAuthProvider.credentialFromResult(result);
-  return {
-    idToken: credential?.idToken,
-    signInMethod: credential?.signInMethod,
-    secret: credential?.secret,
-    accessToken: credential?.accessToken,
-    providerId: credential?.providerId,
-  };
+  console.info("[signInByGoogle] call");
+  try {
+    const result = await signInWithPopup(firebaseAuth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    return {
+      idToken: credential?.idToken,
+      signInMethod: credential?.signInMethod,
+      secret: credential?.secret,
+      accessToken: credential?.accessToken,
+      providerId: credential?.providerId,
+    };
+  } catch (e) {
+    if (e instanceof FirebaseError) {
+      console.log("[signInByGoogle] got FirebaseError", e);
+    } else {
+      console.log("[signInByGoogle] got UnexpectedError", e);
+    }
+    throw e;
+  }
+};
+
+export const signOutByGoogle = async () => {
+  console.info("[signOutByGoogle] call");
+  try {
+    await signOut(firebaseAuth);
+  } catch (e) {
+    if (e instanceof FirebaseError) {
+      console.log("[signOutByGoogle] got FirebaseError", e);
+    } else {
+      console.log("[signOutByGoogle] got UnexpectedError", e);
+    }
+    throw e;
+  }
 };

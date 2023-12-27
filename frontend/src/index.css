@@ -3,6 +3,8 @@
 :root {
     height: 100vh;
     background-color: whitesmoke;
+
+    --header-color-bg: #3399cc;
 }
 
 html {
