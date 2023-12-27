@@ -4,7 +4,6 @@ import AddItemModal from "./components/AddItem/AddItemModal/AddItemModal.tsx";
 import AddItemButton from "./components/AddItem/AddItemButton/AddItemButton.tsx";
 
 const DashboardPage = () => {
-  console.info("DashboardPage");
   const { showAddModal, setShowAddModal } = useDashboard();
 
   return (
