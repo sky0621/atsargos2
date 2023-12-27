@@ -11,6 +11,7 @@ import (
 	"image/png"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -32,25 +33,32 @@ import (
 )
 
 func main() {
+	fn := "main"
+
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
 	projectID := os.Getenv("PROJECT_ID")
 	if projectID == "" {
 		log.Fatal("no PROJECT_ID")
 	}
-	fmt.Println(projectID)
+	slog.Info("env", slog.String("PROJECT_ID", projectID), slog.String("func", fn))
 
 	ctx := context.Background()
 	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	authCli, err := app.Auth(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	firestoreCli, err := app.Firestore(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	storageCli, err := app.Storage(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -84,15 +92,20 @@ func main() {
 func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			fn := "createCustomMiddleware"
+
 			idToken := c.Request().Header.Get("id-token")
 			token, err := authCli.VerifyIDToken(c.Request().Context(), idToken)
 			if err != nil {
+				slog.Error("failed to VerifyIDToken", slog.Any("token", token), slog.String("func", fn))
 				return err
 			}
 			if token == nil {
+				slog.Error("after VerifyIDToken: token is nil", slog.String("func", fn))
 				return fmt.Errorf("token is nil")
 			}
-			fmt.Println(token)
+			slog.Info("after VerifyIDToken", slog.Any("token", token), slog.String("func", fn))
+
 			err = next(c)
 			return err
 		}
@@ -101,14 +114,18 @@ func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
 
 func static() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		fn := "static"
+
 		wd, err := os.Getwd()
 		if err != nil {
-			log.Println(err)
+			slog.Error("failed to os.Getwd", slog.Any("error", err), slog.String("func", fn))
 			return err
 		}
-		fmt.Println(wd)
+		slog.Info("after os.Getwd", slog.String("wd", wd), slog.String("func", fn))
+
 		root := http.Dir(filepath.Join(wd, "view"))
-		fmt.Println(root)
+		slog.Info("after http.Dir", slog.Any("root", root), slog.String("func", fn))
+
 		fs := http.FileServer(root)
 		fs.ServeHTTP(c.Response(), c.Request())
 		return nil
@@ -117,12 +134,16 @@ func static() echo.HandlerFunc {
 
 func addItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		fn := "addItem"
+
 		date := c.FormValue("date")
 		name := c.FormValue("name")
 		notifyStr := c.FormValue("notify")
+		slog.Info("got formValues", slog.String("date", date), slog.String("name", name), slog.String("notify", notifyStr), slog.String("func", fn))
+
 		notify, err := strconv.Atoi(notifyStr)
 		if err != nil {
-			fmt.Println(err)
+			slog.Error("failed to strconv.Atoi", slog.Any("error", err), slog.String("func", fn))
 			if !strings.Contains(err.Error(), "no such file") {
 				return c.String(http.StatusInternalServerError, err.Error())
 			}
@@ -160,7 +181,7 @@ func addItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc 
 			},
 		)
 		if err != nil {
-			fmt.Println(err)
+			slog.Error("failed to save to firestore", slog.Any("error", err), slog.String("func", fn))
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 

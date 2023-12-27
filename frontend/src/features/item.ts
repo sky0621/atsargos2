@@ -38,9 +38,11 @@ export const listItem = async (idToken: string): Promise<Items> => {
 export const addItem = async (idToken: string, item: AddItemType) => {
   console.info("[addItem] start");
   try {
-    await post("/items", idToken, JSON.stringify(item));
+    const body = JSON.stringify(item);
+    console.info("[addItem] body", body);
+    await post("/items", idToken, body);
   } catch (e) {
-    console.error(e);
+    console.error("[addItem] got error", e);
     throw e;
   }
 };
