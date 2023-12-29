@@ -3,11 +3,13 @@ import { addItem } from "../../../../../features/item.ts";
 import { useState } from "react";
 import { useAuthContext } from "../../../../components/AuthProvider.tsx";
 import { UnauthorizedError } from "../../../../../lib/error.ts";
+import { message } from "antd";
 
-export const useAddItemForm = () => {
+export const useAddItemForm = (onFinishEnd: () => void) => {
   console.info("[useAddItemForm] start");
   const { user } = useAuthContext();
   const [error, setError] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values: any) => {
     const item = AddItemSchema.parse(values);
@@ -18,6 +20,8 @@ export const useAddItemForm = () => {
         throw UnauthorizedError;
       }
       await addItem(idToken, item);
+      messageApi.info("Success");
+      onFinishEnd();
     } catch (e) {
       console.error(e);
       if (e instanceof Error) {
@@ -28,5 +32,5 @@ export const useAddItemForm = () => {
     }
   };
 
-  return { onFinish, error };
+  return { onFinish, error, contextHolder };
 };

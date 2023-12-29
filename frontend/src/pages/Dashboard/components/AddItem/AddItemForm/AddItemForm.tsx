@@ -1,11 +1,16 @@
 import { Alert, Button, Form, Input } from "antd";
 import { useAddItemForm } from "./useAddItemForm.ts";
 
-const AddItemForm = () => {
-  const { onFinish, error } = useAddItemForm();
+type Props = {
+  onFinishEnd: () => void;
+};
+
+const AddItemForm = (props: Props) => {
+  const { onFinish, error, contextHolder } = useAddItemForm(props.onFinishEnd);
 
   return (
     <>
+      {contextHolder}
       {error && <Alert type="error" message={error} />}
       <Form name="AddItemForm" layout="vertical" onFinish={onFinish}>
         <Form.Item

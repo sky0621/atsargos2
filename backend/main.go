@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 
@@ -132,21 +131,27 @@ func static() echo.HandlerFunc {
 	}
 }
 
+type AddItemRequest struct {
+	Name   string
+	Date   string
+	Notify string
+}
+
 func addItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fn := "addItem"
 
-		date := c.FormValue("date")
-		name := c.FormValue("name")
-		notifyStr := c.FormValue("notify")
-		slog.Info("got formValues", slog.String("date", date), slog.String("name", name), slog.String("notify", notifyStr), slog.String("func", fn))
+		r := AddItemRequest{}
+		if err := c.Bind(&r); err != nil {
+			slog.Error("failed to strconv.Atoi", slog.Any("error", err), slog.String("func", fn))
+			return err
+		}
+		slog.Info("got formValues", slog.Any("request", r), slog.String("func", fn))
 
-		notify, err := strconv.Atoi(notifyStr)
+		notify, err := strconv.Atoi(r.Notify)
 		if err != nil {
 			slog.Error("failed to strconv.Atoi", slog.Any("error", err), slog.String("func", fn))
-			if !strings.Contains(err.Error(), "no such file") {
-				return c.String(http.StatusInternalServerError, err.Error())
-			}
+
 		}
 
 		//imageFile, err := c.FormFile("imageFile")
@@ -175,8 +180,8 @@ func addItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc 
 		_, err = firestoreCli.Collection("items").Doc(id).Set(c.Request().Context(),
 			map[string]interface{}{
 				"id":     id,
-				"date":   date,
-				"name":   name,
+				"date":   r.Date,
+				"name":   r.Name,
 				"notify": notify,
 			},
 		)

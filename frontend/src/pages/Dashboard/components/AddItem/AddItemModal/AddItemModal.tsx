@@ -9,7 +9,11 @@ type Props = {
 };
 
 const AddItemModal = (props: Props) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onCancel = (_: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    props.setShowAddModal(false);
+  };
+  const onFinishEnd = () => {
     props.setShowAddModal(false);
   };
 
@@ -25,7 +29,7 @@ const AddItemModal = (props: Props) => {
       closable={true}
       maskClosable={true}
     >
-      <AddItemForm />
+      <AddItemForm onFinishEnd={onFinishEnd} />
     </Modal>
   );
 };

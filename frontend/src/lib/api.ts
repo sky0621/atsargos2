@@ -37,8 +37,10 @@ export async function callApi(
   if (method !== "get" && method !== "head") {
     init.body = body;
   }
+  console.info("[lib/api][callApi] got init:", init);
 
   const baseUrl = import.meta.env.VITE_BASE_URL;
+  console.info("[lib/api][callApi] got baseUrl:", baseUrl);
 
   const response = await fetch(baseUrl + "/api" + path, init);
   console.info("[lib/api][callApi] got response:", response);
