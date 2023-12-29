@@ -1,4 +1,4 @@
-import { Alert, Button, Form, Input } from "antd";
+import { Alert, Button, DatePicker, Form, Input } from "antd";
 import { useAddItemForm } from "./useAddItemForm.ts";
 
 type Props = {
@@ -6,13 +6,19 @@ type Props = {
 };
 
 const AddItemForm = (props: Props) => {
-  const { onFinish, error, contextHolder } = useAddItemForm(props.onFinishEnd);
+  const { form, onDateChanged, onFinish, error, contextHolder } =
+    useAddItemForm(props.onFinishEnd);
 
   return (
     <>
       {contextHolder}
       {error && <Alert type="error" message={error} />}
-      <Form name="AddItemForm" layout="vertical" onFinish={onFinish}>
+      <Form
+        form={form}
+        name="AddItemForm"
+        layout="vertical"
+        onFinish={onFinish}
+      >
         <Form.Item
           label="Name"
           name="name"
@@ -25,7 +31,8 @@ const AddItemForm = (props: Props) => {
           name="date"
           rules={[{ required: true, message: "Please input date!" }]}
         >
-          <Input />
+          <DatePicker onChange={onDateChanged} />
+          <Input hidden />
         </Form.Item>
         <Form.Item
           label="Notify"

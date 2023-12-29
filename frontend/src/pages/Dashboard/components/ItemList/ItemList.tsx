@@ -20,7 +20,7 @@ const ItemList = () => {
           <Card.Meta
             data-id="CARD_META"
             title={item.name}
-            description={`notify interval: ${item.notify} days`}
+            description={`interval: ${item.notify} days`}
           />
         </Card>
       ))}

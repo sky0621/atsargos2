@@ -3,15 +3,23 @@ import { addItem } from "../../../../../features/item.ts";
 import { useState } from "react";
 import { useAuthContext } from "../../../../components/AuthProvider.tsx";
 import { UnauthorizedError } from "../../../../../lib/error.ts";
-import { message } from "antd";
+import { DatePickerProps, Form, message } from "antd";
+
+//type AddItemForm = {};
 
 export const useAddItemForm = (onFinishEnd: () => void) => {
   console.info("[useAddItemForm] start");
   const { user } = useAuthContext();
   const [error, setError] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
+  const [form] = Form.useForm<never>();
 
-  const onFinish = async (values: any) => {
+  const onDateChanged: DatePickerProps["onChange"] = (date, dateString) => {
+    console.log(date, dateString);
+    form.setFieldValue("date", dateString);
+  };
+
+  const onFinish = async (values: never) => {
     const item = AddItemSchema.parse(values);
     console.info("[useAddItemForm][onFinish] item:", item);
     try {
@@ -32,5 +40,5 @@ export const useAddItemForm = (onFinishEnd: () => void) => {
     }
   };
 
-  return { onFinish, error, contextHolder };
+  return { form, onDateChanged, onFinish, error, contextHolder };
 };
