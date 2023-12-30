@@ -2,7 +2,7 @@ import { Card, Flex } from "antd";
 import styles from "./styles.module.css";
 import { useItemList } from "./useItemList.ts";
 import EditItemModal from "../EditItem/EditItemModal/EditItemModal.tsx";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { MouseEvent } from "react";
 
 const ItemList = () => {
@@ -28,6 +28,13 @@ const ItemList = () => {
             actions={[
               <EditOutlined
                 key="edit"
+                onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                  console.info(e);
+                  openEditModal(item);
+                }}
+              />,
+              <DeleteOutlined
+                key="delete"
                 onClick={(e: MouseEvent<HTMLButtonElement>) => {
                   console.info(e);
                   openEditModal(item);
