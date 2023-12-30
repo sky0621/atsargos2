@@ -4,6 +4,7 @@
     height: 100vh;
     background-color: whitesmoke;
 
+    --base-color-bg: #f2f2f2;
     --header-color-bg: #3399cc;
 }
 

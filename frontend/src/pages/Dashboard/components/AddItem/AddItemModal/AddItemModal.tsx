@@ -1,7 +1,8 @@
 import { Modal } from "antd";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import AddItemForm from "../AddItemForm/AddItemForm.tsx";
 import styles from "./styles.module.css";
+import { useAddItemModal } from "./useAddItemModal.ts";
 
 type Props = {
   isOpen: boolean;
@@ -9,16 +10,15 @@ type Props = {
 };
 
 const AddItemModal = (props: Props) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onCancel = (_: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    props.setShowAddModal(false);
-  };
-  const onFinishEnd = () => {
-    props.setShowAddModal(false);
-  };
+  console.info("[AddItemModal] call");
+
+  const { form, onCancel, onFinishEnd } = useAddItemModal(
+    props.setShowAddModal,
+  );
 
   return (
     <Modal
+      data-id="ADD_ITEM_MODAL"
       open={props.isOpen}
       title="Add Item"
       okText=""
@@ -29,7 +29,7 @@ const AddItemModal = (props: Props) => {
       closable={true}
       maskClosable={true}
     >
-      <AddItemForm onFinishEnd={onFinishEnd} />
+      <AddItemForm form={form} onFinishEnd={onFinishEnd} />
     </Modal>
   );
 };

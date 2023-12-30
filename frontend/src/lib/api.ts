@@ -20,12 +20,17 @@ export async function callApi(
   idToken: string,
   body?: string,
 ): Promise<Response> {
-  console.info("[lib/api][callApi] call", method, path, body);
+  console.info("[lib/api][callApi] call");
+  console.info("[lib/api][callApi] method", method);
+  console.info("[lib/api][callApi] path", path);
+  console.info("[lib/api][callApi] idToken", idToken);
+  console.info("[lib/api][callApi] body", body);
 
   if (!idToken) {
     console.error("[lib/api][callApi] no idToken");
     throw UnauthorizedError;
   }
+
   const init: RequestInit = {
     method: method,
     headers: new Headers({
@@ -42,7 +47,10 @@ export async function callApi(
   const baseUrl = import.meta.env.VITE_BASE_URL;
   console.info("[lib/api][callApi] got baseUrl:", baseUrl);
 
-  const response = await fetch(baseUrl + "/api" + path, init);
+  const url = baseUrl + "/api" + path;
+  console.info("[lib/api][callApi] got url:", url);
+
+  const response = await fetch(url, init);
   console.info("[lib/api][callApi] got response:", response);
   if (response.ok) {
     return response;

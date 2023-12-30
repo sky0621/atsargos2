@@ -3,27 +3,25 @@ import { addItem } from "../../../../../features/item.ts";
 import { useState } from "react";
 import { useAuthContext } from "../../../../components/AuthProvider.tsx";
 import { UnauthorizedError } from "../../../../../lib/error.ts";
-import { DatePickerProps, Form, message } from "antd";
+import { DatePickerProps, FormInstance, message } from "antd";
 
-//type AddItemForm = {};
+export const useAddItemForm = (form: FormInstance, onFinishEnd: () => void) => {
+  console.info("[useAddItemForm] call");
 
-export const useAddItemForm = (onFinishEnd: () => void) => {
-  console.info("[useAddItemForm] start");
   const { user } = useAuthContext();
   const [error, setError] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
-  const [form] = Form.useForm<never>();
 
-  const onDateChanged: DatePickerProps["onChange"] = (date, dateString) => {
-    console.log(date, dateString);
+  const onDateChanged: DatePickerProps["onChange"] = (_, dateString) => {
     form.setFieldValue("date", dateString);
   };
 
   const onFinish = async (values: never) => {
+    console.info("[useAddItemForm][onFinish] values:", values);
     const item = AddItemSchema.parse(values);
     console.info("[useAddItemForm][onFinish] item:", item);
     try {
-      const idToken = await user?.getIdToken();
+      const idToken = await user?.getIdToken(true);
       if (!idToken) {
         throw UnauthorizedError;
       }
@@ -31,7 +29,7 @@ export const useAddItemForm = (onFinishEnd: () => void) => {
       messageApi.info("Success");
       onFinishEnd();
     } catch (e) {
-      console.error(e);
+      console.error("[useAddItemForm][onFinish] failed to addItem", e);
       if (e instanceof Error) {
         setError(e.message);
       } else {
@@ -40,5 +38,5 @@ export const useAddItemForm = (onFinishEnd: () => void) => {
     }
   };
 
-  return { form, onDateChanged, onFinish, error, contextHolder };
+  return { onDateChanged, onFinish, error, contextHolder };
 };

@@ -8,7 +8,6 @@ export const ItemSchema = z.object({
   date: z.string(),
   name: z.string(),
   notify: z.number(),
-  url: z.string(),
 });
 
 export type Item = z.infer<typeof ItemSchema>;
@@ -36,7 +35,7 @@ export const listItem = async (idToken: string): Promise<Items> => {
 };
 
 export const addItem = async (idToken: string, item: AddItemType) => {
-  console.info("[addItem] start");
+  console.info("[addItem] start", item);
   try {
     const body = JSON.stringify(item);
     console.info("[addItem] body", body);

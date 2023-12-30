@@ -1,15 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"image"
-	"image/gif"
-	"image/jpeg"
-	"image/png"
-	"io"
 	"log"
 	"log/slog"
 	"net/http"
@@ -20,8 +14,6 @@ import (
 	"github.com/google/uuid"
 
 	"google.golang.org/api/iterator"
-
-	"golang.org/x/image/draw"
 
 	"cloud.google.com/go/firestore"
 	"firebase.google.com/go/auth"
@@ -58,12 +50,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	storageCli, err := app.Storage(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(storageCli)
-
 	var e *echo.Echo
 	{
 		e = echo.New()
@@ -75,7 +61,7 @@ func main() {
 		e.GET("/*", static())
 		g := e.Group("/api", createCustomMiddleware(authCli))
 		g.GET("/items", listItem(firestoreCli, projectID))
-		g.POST("/items", addItem(firestoreCli, projectID))
+		g.POST("/items", addItem(firestoreCli))
 	}
 
 	port := os.Getenv("PORT")
@@ -96,7 +82,7 @@ func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
 			idToken := c.Request().Header.Get("id-token")
 			token, err := authCli.VerifyIDToken(c.Request().Context(), idToken)
 			if err != nil {
-				slog.Error("failed to VerifyIDToken", slog.Any("token", token), slog.String("func", fn))
+				slog.Error("failed to VerifyIDToken", slog.Any("error", err), slog.Any("token", token), slog.String("func", fn))
 				return err
 			}
 			if token == nil {
@@ -131,51 +117,31 @@ func static() echo.HandlerFunc {
 	}
 }
 
-type AddItemRequest struct {
-	Name   string
-	Date   string
-	Notify string
-}
-
-func addItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
+func addItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fn := "addItem"
 
 		r := AddItemRequest{}
 		if err := c.Bind(&r); err != nil {
-			slog.Error("failed to strconv.Atoi", slog.Any("error", err), slog.String("func", fn))
-			return err
+			slog.Error("failed to bind Request", slog.Any("error", err), slog.String("func", fn))
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 		slog.Info("got formValues", slog.Any("request", r), slog.String("func", fn))
 
 		notify, err := strconv.Atoi(r.Notify)
 		if err != nil {
 			slog.Error("failed to strconv.Atoi", slog.Any("error", err), slog.String("func", fn))
-
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		//imageFile, err := c.FormFile("imageFile")
-		//if err != nil {
-		//	fmt.Println(err)
-		//	if !strings.Contains(err.Error(), "no such file") {
-		//		return c.String(http.StatusInternalServerError, err.Error())
-		//	}
-		//}
+		iii, hdr, err2 := c.Request().FormFile("imageFile")
+		if err2 != nil {
+			slog.Error("failed to get FormFile(imageFile)", slog.Any("error", err2), slog.String("func", fn))
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+		slog.Info("got imageFile", slog.Any("imageFile", iii), slog.Any("header", hdr), slog.String("func", fn))
 
 		id := uuid.New().String()
-
-		//if imageFile != nil {
-		//	f, err := imageFile.Open()
-		//	if err != nil {
-		//		fmt.Println(err)
-		//		return c.String(http.StatusInternalServerError, err.Error())
-		//	}
-		//
-		//	if err := uploadGCSObjectFunc(c.Request().Context(), id, f); err != nil {
-		//		fmt.Println(err)
-		//		return c.String(http.StatusInternalServerError, err.Error())
-		//	}
-		//}
 
 		_, err = firestoreCli.Collection("items").Doc(id).Set(c.Request().Context(),
 			map[string]interface{}{
@@ -216,7 +182,6 @@ func listItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc
 				fmt.Println(err)
 				return c.String(http.StatusInternalServerError, err.Error())
 			}
-			item.URL = "https://firebasestorage.googleapis.com/v0/b/" + projectID + ".appspot.com/o/" + item.Name + "?alt=media"
 			items = append(items, item)
 		}
 		return c.JSON(http.StatusOK, items)
@@ -228,47 +193,10 @@ type Item struct {
 	Date   string `json:"date"`
 	Name   string `json:"name"`
 	Notify int    `json:"notify"`
-
-	URL string `json:"url"`
 }
 
-func resizedImage(r io.Reader) (io.Reader, error) {
-	imgSrc, imgType, err := image.Decode(r)
-	if err != nil {
-		return nil, err
-	}
-
-	rctSrc := imgSrc.Bounds()
-
-	var imgDst *image.RGBA
-	{
-		dx := rctSrc.Dx()
-		dy := rctSrc.Dy()
-		for dx > 640 {
-			dx = dx / 2
-			dy = dy / 2
-		}
-		imgDst = image.NewRGBA(image.Rect(0, 0, dx, dy))
-	}
-	draw.CatmullRom.Scale(imgDst, imgDst.Bounds(), imgSrc, rctSrc, draw.Over, nil)
-
-	bf := &bytes.Buffer{}
-	switch imgType {
-	case "png":
-		if err := png.Encode(bf, imgDst); err != nil {
-			return nil, err
-		}
-	case "jpeg":
-		if err := jpeg.Encode(bf, imgDst, &jpeg.Options{Quality: 100}); err != nil {
-			return nil, err
-		}
-	case "gif":
-		if err := gif.Encode(bf, imgDst, nil); err != nil {
-			return nil, err
-		}
-	default:
-		return nil, err
-	}
-
-	return bf, nil
+type AddItemRequest struct {
+	Name   string `json:"name"`
+	Date   string `json:"date"`
+	Notify string `json:"notify"`
 }
