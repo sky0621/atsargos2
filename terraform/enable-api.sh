@@ -5,6 +5,7 @@ services=(
     artifactregistry.googleapis.com \
     run.googleapis.com \
     iamcredentials.googleapis.com \
+    cloudscheduler.googleapis.com \
 )
 
 # shellcheck disable=SC2039

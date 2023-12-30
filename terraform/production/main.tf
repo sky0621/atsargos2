@@ -59,3 +59,11 @@ module "cloud_run" {
   container_image = var.container_image
   ingress_pattern = var.ingress_pattern
 }
+
+module "cloud_scheduler" {
+  source = "../modules/cloud_scheduler"
+
+  project_id           = var.project_id
+  region               = var.region
+  cloudrun_service_uri = module.cloud_run.cloud_run_notify_endpoint
+}

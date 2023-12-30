@@ -68,7 +68,7 @@ func main() {
 		g.POST("/items", addItem(firestoreCli))
 		g.PUT("/items", updateItem(firestoreCli))
 		g.DELETE("/items", deleteItem(firestoreCli))
-		e.GET("/notify", notify(firestoreCli, slackCli))
+		e.POST("/notify", notify(firestoreCli, slackCli))
 	}
 
 	port := os.Getenv("PORT")
