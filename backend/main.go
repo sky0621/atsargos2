@@ -10,6 +10,9 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
+
+	"github.com/slack-go/slack"
 
 	"github.com/google/uuid"
 
@@ -25,6 +28,11 @@ import (
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
+	slackToken := os.Getenv("SLACK_API_TOKEN")
+	if slackToken == "" {
+		log.Fatal("no SLACK_API_TOKEN")
+	}
 
 	ctx := context.Background()
 
@@ -43,6 +51,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Slack API クライアント
+	slackCli := slack.New(slackToken, slack.OptionDebug(true))
+
 	var e *echo.Echo
 	{
 		e = echo.New()
@@ -57,6 +68,7 @@ func main() {
 		g.POST("/items", addItem(firestoreCli))
 		g.PUT("/items", updateItem(firestoreCli))
 		g.DELETE("/items", deleteItem(firestoreCli))
+		e.GET("/notify", notify(firestoreCli, slackCli))
 	}
 
 	port := os.Getenv("PORT")
@@ -117,6 +129,7 @@ const mainCollectionName = "items"
 func addItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fn := "addItem"
+		slog.Info("call", slog.String("func", fn))
 
 		r := AddItemRequest{}
 		if err := c.Bind(&r); err != nil {
@@ -153,6 +166,7 @@ func addItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 func updateItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fn := "updateItem"
+		slog.Info("call", slog.String("func", fn))
 
 		r := UpdateItemRequest{}
 		if err := c.Bind(&r); err != nil {
@@ -180,6 +194,7 @@ func updateItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 func deleteItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fn := "deleteItem"
+		slog.Info("call", slog.String("func", fn))
 
 		r := DeleteItemRequest{}
 		if err := c.Bind(&r); err != nil {
@@ -197,10 +212,14 @@ func deleteItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 		return c.JSON(http.StatusNoContent, nil)
 	}
 }
+
 func listItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		fn := "listItem"
+		slog.Info("call", slog.String("func", fn))
+
 		ctx := c.Request().Context()
-		iter := firestoreCli.Collection("items").Documents(ctx)
+		iter := firestoreCli.Collection(mainCollectionName).Documents(ctx)
 		var items []*Item
 		for {
 			doc, err := iter.Next()
@@ -208,20 +227,57 @@ func listItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 				break
 			}
 			if err != nil {
-				return err
+				slog.Error("failed to iter.Next", slog.Any("error", err), slog.String("func", fn))
+				return c.JSON(http.StatusInternalServerError, err.Error())
 			}
+
 			var item *Item
 			if err := doc.DataTo(&item); err != nil {
-				fmt.Println(err)
-				return c.String(http.StatusInternalServerError, err.Error())
-			}
-			if err != nil {
-				fmt.Println(err)
-				return c.String(http.StatusInternalServerError, err.Error())
+				slog.Error("failed to doc.DataTo", slog.Any("error", err), slog.String("func", fn))
+				return c.JSON(http.StatusInternalServerError, err.Error())
 			}
 			items = append(items, item)
 		}
 		return c.JSON(http.StatusOK, items)
+	}
+}
+
+func notify(firestoreCli *firestore.Client, slackCli *slack.Client) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		fn := "notify"
+		slog.Info("call", slog.String("func", fn))
+
+		iter := firestoreCli.Collection(mainCollectionName).Documents(c.Request().Context())
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			var item *Item
+			if err := doc.DataTo(&item); err != nil {
+				slog.Error("failed to doc.DataTo", slog.Any("error", err), slog.String("func", fn))
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+
+			iDate, err := time.Parse("2006-01-02", item.Date)
+			if err != nil {
+				slog.Error("failed to time.Parse", slog.Any("error", err), slog.String("func", fn))
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			if item.Notify > 0 {
+				if iDate.AddDate(0, 0, item.Notify-1).Before(time.Now()) {
+					_, _, _, err := slackCli.SendMessageContext(c.Request().Context(), "general", slack.MsgOptionText(fmt.Sprintf("[%s][%s]", item.Name, item.Date), false))
+					if err != nil {
+						slog.Error("failed to send message", slog.Any("error", err), slog.String("func", fn))
+						return c.JSON(http.StatusInternalServerError, err.Error())
+					}
+				}
+			}
+		}
+		return nil
 	}
 }
 
