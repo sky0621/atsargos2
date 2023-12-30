@@ -62,6 +62,8 @@ func main() {
 		g := e.Group("/api", createCustomMiddleware(authCli))
 		g.GET("/items", listItem(firestoreCli, projectID))
 		g.POST("/items", addItem(firestoreCli))
+		g.PUT("/items", updateItem(firestoreCli))
+		g.DELETE("/items", deleteItem(firestoreCli))
 	}
 
 	port := os.Getenv("PORT")
@@ -117,6 +119,8 @@ func static() echo.HandlerFunc {
 	}
 }
 
+const mainCollectionName = "items"
+
 func addItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fn := "addItem"
@@ -134,16 +138,9 @@ func addItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		iii, hdr, err2 := c.Request().FormFile("imageFile")
-		if err2 != nil {
-			slog.Error("failed to get FormFile(imageFile)", slog.Any("error", err2), slog.String("func", fn))
-			return c.JSON(http.StatusBadRequest, err.Error())
-		}
-		slog.Info("got imageFile", slog.Any("imageFile", iii), slog.Any("header", hdr), slog.String("func", fn))
-
 		id := uuid.New().String()
 
-		_, err = firestoreCli.Collection("items").Doc(id).Set(c.Request().Context(),
+		_, err = firestoreCli.Collection(mainCollectionName).Doc(id).Set(c.Request().Context(),
 			map[string]interface{}{
 				"id":     id,
 				"date":   r.Date,
@@ -160,6 +157,53 @@ func addItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	}
 }
 
+func updateItem(firestoreCli *firestore.Client) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		fn := "updateItem"
+
+		r := UpdateItemRequest{}
+		if err := c.Bind(&r); err != nil {
+			slog.Error("failed to bind Request", slog.Any("error", err), slog.String("func", fn))
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+		slog.Info("got formValues", slog.Any("request", r), slog.String("func", fn))
+
+		_, err := firestoreCli.Collection(mainCollectionName).Doc(r.ID).Update(c.Request().Context(),
+			[]firestore.Update{
+				{Path: "date", Value: r.Date},
+				{Path: "name", Value: r.Name},
+				{Path: "notify", Value: r.Notify},
+			},
+		)
+		if err != nil {
+			slog.Error("failed to update firestore", slog.Any("error", err), slog.String("func", fn))
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, nil)
+	}
+}
+
+func deleteItem(firestoreCli *firestore.Client) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		fn := "deleteItem"
+
+		r := DeleteItemRequest{}
+		if err := c.Bind(&r); err != nil {
+			slog.Error("failed to bind Request", slog.Any("error", err), slog.String("func", fn))
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+		slog.Info("got formValues", slog.Any("request", r), slog.String("func", fn))
+
+		_, err := firestoreCli.Collection("image").Doc(r.ID).Delete(c.Request().Context())
+		if err != nil {
+			slog.Error("failed to delete firestore", slog.Any("error", err), slog.String("func", fn))
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		return c.JSON(http.StatusNoContent, nil)
+	}
+}
 func listItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
@@ -199,4 +243,15 @@ type AddItemRequest struct {
 	Name   string `json:"name"`
 	Date   string `json:"date"`
 	Notify string `json:"notify"`
+}
+
+type UpdateItemRequest struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Date   string `json:"date"`
+	Notify int    `json:"notify"`
+}
+
+type DeleteItemRequest struct {
+	ID string `json:"id"`
 }

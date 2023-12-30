@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { get, post } from "../lib/api.ts";
+import { get, post, put } from "../lib/api.ts";
 import { toError } from "../lib/error.ts";
 import { AddItemType } from "../pages/Dashboard/components/AddItem/addItem.ts";
+import { EditItemType } from "../pages/Dashboard/components/EditItem/editItem.ts";
 
 export const ItemSchema = z.object({
   id: z.string(),
@@ -42,6 +43,18 @@ export const addItem = async (idToken: string, item: AddItemType) => {
     await post("/items", idToken, body);
   } catch (e) {
     console.error("[addItem] got error", e);
+    throw e;
+  }
+};
+
+export const editItem = async (idToken: string, item: EditItemType) => {
+  console.info("[editItem] start", item);
+  try {
+    const body = JSON.stringify(item);
+    console.info("[editItem] body", body);
+    await put("/items", idToken, body);
+  } catch (e) {
+    console.error("[editItem] got error", e);
     throw e;
   }
 };

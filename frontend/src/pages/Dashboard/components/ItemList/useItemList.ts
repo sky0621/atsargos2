@@ -8,6 +8,8 @@ export const useItemList = () => {
 
   const { user } = useAuthContext();
   const [items, setItems] = useState<Item[]>();
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [item, setItem] = useState<Item>();
 
   useEffect(() => {
     (async () => {
@@ -27,5 +29,11 @@ export const useItemList = () => {
     })();
   }, []);
 
-  return { items };
+  const openEditModal = (item: Item) => {
+    console.info("[useItemList][openEditModal] call", item);
+    setItem(item);
+    setShowEditModal(true);
+  };
+
+  return { items, showEditModal, setShowEditModal, openEditModal, item };
 };

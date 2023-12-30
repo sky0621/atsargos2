@@ -14,6 +14,15 @@ export async function post(
   return callApi("post", path, idToken, body);
 }
 
+export async function put(
+  path: string,
+  idToken: string,
+  body?: string,
+): Promise<Response> {
+  console.info("[lib/api][post] call", path, body);
+  return callApi("put", path, idToken, body);
+}
+
 export async function callApi(
   method: string,
   path: string,
