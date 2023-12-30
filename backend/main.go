@@ -24,17 +24,10 @@ import (
 )
 
 func main() {
-	fn := "main"
-
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
-	projectID := os.Getenv("PROJECT_ID")
-	if projectID == "" {
-		log.Fatal("no PROJECT_ID")
-	}
-	slog.Info("env", slog.String("PROJECT_ID", projectID), slog.String("func", fn))
-
 	ctx := context.Background()
+
 	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +53,7 @@ func main() {
 
 		e.GET("/*", static())
 		g := e.Group("/api", createCustomMiddleware(authCli))
-		g.GET("/items", listItem(firestoreCli, projectID))
+		g.GET("/items", listItem(firestoreCli))
 		g.POST("/items", addItem(firestoreCli))
 		g.PUT("/items", updateItem(firestoreCli))
 		g.DELETE("/items", deleteItem(firestoreCli))
@@ -204,7 +197,7 @@ func deleteItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 		return c.JSON(http.StatusNoContent, nil)
 	}
 }
-func listItem(firestoreCli *firestore.Client, projectID string) echo.HandlerFunc {
+func listItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		iter := firestoreCli.Collection("items").Documents(ctx)
