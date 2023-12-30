@@ -2,7 +2,7 @@ resource "google_cloud_scheduler_job" "default" {
   name             = "notify"
   project          = var.project_id
   region           = var.region
-  schedule         = "00 0 * * *"
+  schedule         = "00 9 * * *"
   time_zone        = "Asia/Tokyo"
   attempt_deadline = "60s"
 
