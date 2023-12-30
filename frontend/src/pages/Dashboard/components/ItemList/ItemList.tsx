@@ -1,18 +1,28 @@
-import { Card, Flex } from "antd";
+import { Alert, Card, Flex } from "antd";
 import styles from "./styles.module.css";
 import { useItemList } from "./useItemList.ts";
 import EditItemModal from "../EditItem/EditItemModal/EditItemModal.tsx";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { MouseEvent } from "react";
 
 const ItemList = () => {
   console.info("[ItemList] call");
 
-  const { items, showEditModal, setShowEditModal, openEditModal, item } =
-    useItemList();
+  const {
+    items,
+    showEditModal,
+    setShowEditModal,
+    openEditModal,
+    item,
+    deleteItem,
+    error,
+    contextHolder,
+  } = useItemList();
 
   return (
     <>
+      {contextHolder}
+      {error && <Alert type="error" message={error} />}
       <EditItemModal
         isOpen={showEditModal}
         setShowEditModal={setShowEditModal}
@@ -35,9 +45,9 @@ const ItemList = () => {
               />,
               <DeleteOutlined
                 key="delete"
-                onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                onClick={async (e: MouseEvent<HTMLButtonElement>) => {
                   console.info(e);
-                  openEditModal(item);
+                  await deleteItem(item);
                 }}
               />,
             ]}

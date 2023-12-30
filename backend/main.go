@@ -195,7 +195,7 @@ func deleteItem(firestoreCli *firestore.Client) echo.HandlerFunc {
 		}
 		slog.Info("got formValues", slog.Any("request", r), slog.String("func", fn))
 
-		_, err := firestoreCli.Collection("image").Doc(r.ID).Delete(c.Request().Context())
+		_, err := firestoreCli.Collection(mainCollectionName).Doc(r.ID).Delete(c.Request().Context())
 		if err != nil {
 			slog.Error("failed to delete firestore", slog.Any("error", err), slog.String("func", fn))
 			return c.JSON(http.StatusInternalServerError, err.Error())

@@ -19,7 +19,6 @@ const AppHeader = () => {
 
   return (
     <div className={styles.section}>
-      <span className={styles.emailArea}>{user.email}</span>
       <Popconfirm
         title="Would you like to sign out?"
         onConfirm={confirm}

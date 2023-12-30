@@ -19,8 +19,17 @@ export async function put(
   idToken: string,
   body?: string,
 ): Promise<Response> {
-  console.info("[lib/api][post] call", path, body);
+  console.info("[lib/api][put] call", path, body);
   return callApi("put", path, idToken, body);
+}
+
+export async function del(
+  path: string,
+  idToken: string,
+  body?: string,
+): Promise<Response> {
+  console.info("[lib/api][del] call", path, body);
+  return callApi("delete", path, idToken, body);
 }
 
 export async function callApi(
