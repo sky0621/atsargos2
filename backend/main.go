@@ -29,6 +29,11 @@ import (
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
+	notifyApiKey := os.Getenv("NOTIFY_API_KEY")
+	if notifyApiKey == "" {
+		log.Fatal("no NOTIFY_API_KEY")
+	}
+
 	slackToken := os.Getenv("SLACK_API_TOKEN")
 	if slackToken == "" {
 		log.Fatal("no SLACK_API_TOKEN")
@@ -63,12 +68,15 @@ func main() {
 		e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(5)))
 
 		e.GET("/*", static())
-		g := e.Group("/api", createCustomMiddleware(authCli))
+
+		g := e.Group("/api", verifyIDTokenMiddleware(authCli))
 		g.GET("/items", listItem(firestoreCli))
 		g.POST("/items", addItem(firestoreCli))
 		g.PUT("/items", updateItem(firestoreCli))
 		g.DELETE("/items", deleteItem(firestoreCli))
-		e.POST("/notify", notify(firestoreCli, slackCli))
+
+		g2 := e.Group("/api2", verifyAPIKeyMiddleware(notifyApiKey))
+		g2.POST("/notify", notify(firestoreCli, slackCli))
 	}
 
 	port := os.Getenv("PORT")
@@ -81,10 +89,11 @@ func main() {
 	}
 }
 
-func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
+func verifyIDTokenMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			fn := "createCustomMiddleware"
+			fn := "verifyIDTokenMiddleware"
+			slog.Info("call", slog.String("func", fn))
 
 			idToken := c.Request().Header.Get("id-token")
 			token, err := authCli.VerifyIDToken(c.Request().Context(), idToken)
@@ -100,6 +109,24 @@ func createCustomMiddleware(authCli *auth.Client) echo.MiddlewareFunc {
 
 			err = next(c)
 			return err
+		}
+	}
+}
+
+func verifyAPIKeyMiddleware(notifyApiKey string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			fn := "verifyAPIKeyMiddleware"
+			slog.Info("call", slog.String("notifyApiKey", notifyApiKey), slog.String("func", fn))
+
+			apiKey := c.Request().Header.Get("api-key")
+			slog.Info("got api-key", slog.String("apiKey", apiKey), slog.String("func", fn))
+			if apiKey != notifyApiKey {
+				slog.Error("after matching api-key", slog.String("func", fn))
+				return fmt.Errorf("api-key not match")
+			}
+
+			return next(c)
 		}
 	}
 }

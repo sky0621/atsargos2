@@ -12,10 +12,11 @@ resource "google_cloud_scheduler_job" "default" {
 
   http_target {
     http_method = "POST"
-    uri         = var.cloudrun_service_uri
+    uri         = var.cloudrun_target_uri
     body        = base64encode("{}") // empty body
     headers = {
       "Content-Type" = "application/json"
+      "api-key"      = var.api_key
     }
   }
 }

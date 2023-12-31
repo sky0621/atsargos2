@@ -8,7 +8,12 @@ variable "region" {
   default = null
 }
 
-variable "cloudrun_service_uri" {
+variable "cloudrun_target_uri" {
+  type    = string
+  default = null
+}
+
+variable "api_key" {
   type    = string
   default = null
 }

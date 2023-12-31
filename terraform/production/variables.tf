@@ -26,3 +26,9 @@ variable "ingress_pattern" {
   type        = string
   default     = "INGRESS_TRAFFIC_ALL"
 }
+
+variable "notify_api_key" {
+  description = "api key for call notify"
+  type        = string
+  default     = null
+}

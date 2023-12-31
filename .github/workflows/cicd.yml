@@ -41,6 +41,7 @@ jobs:
           echo "REPO_DOMAIN=${repo_domain}" >> $GITHUB_OUTPUT
           echo "IMAGE=${repo_domain}/${prj_id}/${{ env.repo }}/${{ env.service }}:${{ github.sha }}" >> $GITHUB_OUTPUT
 
+          echo "NOTIFY_API_KEY=${{ vars.NOTIFY_API_KEY }}" >> $GITHUB_OUTPUT
           echo "SLACK_API_TOKEN=${{ vars.SLACK_API_TOKEN }}" >> $GITHUB_OUTPUT
 
       - id: "google-auth"
@@ -82,6 +83,7 @@ jobs:
           # NOTE: You can also set env variables here:
           env_vars: |
             PROJECT_ID=${{ steps.set-vars.outputs.PROJECT_ID }}
+            NOTIFY_API_KEY=${{ steps.set-vars.outputs.NOTIFY_API_KEY }}
             SLACK_API_TOKEN=${{ steps.set-vars.outputs.SLACK_API_TOKEN }}
 
       - id: "update-traffic"

@@ -63,7 +63,8 @@ module "cloud_run" {
 module "cloud_scheduler" {
   source = "../modules/cloud_scheduler"
 
-  project_id           = var.project_id
-  region               = var.region
-  cloudrun_service_uri = module.cloud_run.cloud_run_notify_endpoint
+  project_id          = var.project_id
+  region              = var.region
+  cloudrun_target_uri = module.cloud_run.cloud_run_notify_endpoint
+  api_key             = var.notify_api_key
 }
