@@ -16,6 +16,7 @@ const AddItemButton = (props: Props) => {
     <Avatar
       data-id="ADD_ITEM_BUTTON_AVATAR"
       icon={<PlusCircleTwoTone />}
+      size="large"
       onClick={addItem}
       className={styles.avatar}
     />

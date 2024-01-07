@@ -1,4 +1,3 @@
 .avatar {
-    margin-bottom: 12px;
-    background-color: var(--base-color-bg);
+    background-color: var(--header-color-bg);
 }

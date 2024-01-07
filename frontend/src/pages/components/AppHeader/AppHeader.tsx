@@ -9,6 +9,7 @@ const AppHeader = () => {
   console.info("AppHeader");
   const { user } = useAuthContext();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const confirm = async (_?: React.MouseEvent<HTMLElement>) => {
     await signOutByGoogle();
   };
