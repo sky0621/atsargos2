@@ -31,6 +31,8 @@ atsargos では画像アップロード機能もあったが、ほぼ使って�
 
 ![p](pics/p06_edit.png)
 
+### Slack通知
+
 ![p](pics/p07_slack.png)
 
 ## Architecture
